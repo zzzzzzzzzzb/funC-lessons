@@ -1,0 +1,76 @@
+#include "imports/stdlib.fc";
+
+{-
+    代理合约：
+    1. 转发所有的消息给合约owner
+    2. 转发时，sender地址在第一位，原始消息体在第二位
+    3. 转发消息中TON代币的数量必须等于接受消息的value减去手续费
+    4. owner的地址存在合约的storage中
+    5. 当合约owner发送消息给合约时，不会被转发
+-}
+
+;; 从 storage 中加载 owner 的地址
+slice load_data() inline {
+    var ds = get_data().begin_parse();
+    return ds~load_msg_addr();
+}
+
+;; 从 in_msg_full 中解析出 sender_address
+;; inline关键字，表示这个函数是内联的，编译器会直接将函数体插入到调用处
+slice parse_sender_address(cell in_msg_full) inline {
+    var cs = in_msg_full.begin_parse();
+    var flags = cs~load_uint(4);
+    slice sender_address = cs~load_msg_addr();
+    return sender_address;
+}
+
+{-
+    比较两个 slice 是否相等
+    1. asm "SDEQ" 汇编原语，直接调用TVM的SDEQ指令
+    2. SDEQ指令用于比较两个slice是否完全相等，如果相等返回true（-1），否则返回false（0）
+-}
+int equal_slices(slice a, slice b) asm "SDEQ";
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    ;; 消息发送者地址
+    slice sender_address = parse_sender_address(in_msg_full);
+    ;; 合约 owner 地址
+    slice owner_address = load_data();
+
+    ;; 如果不相等，则需要进行转发
+    if ~(equal_slices(sender_address, owner_address)) {
+        ;; 构造消息体
+        cell msg_body_cell = begin_cell().store_slice(in_msg_body).end_cell();
+
+        {-
+            消息结构，格式如下：
+             var msg = begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice(addr)
+            .store_coins(amount)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_slice(message_body)
+        .end_cell();
+
+            根据上文的要求，消息中顺序是，sender地址+消息内容
+        -}
+
+        ;; 构造转发消息
+        var msg_forward = begin_cell()
+        .store_uint(0x10, 6)
+        .store_slice(owner_address)
+        .store_grams(0)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_slice(sender_address)
+        .store_ref(msg_body_cell)
+    .end_cell();
+
+        ;; 发送消息
+        send_raw_message(msg_forward, 64);
+    }
+}
+
+slice get_owner() method_id {
+    slice ds = get_data().begin_parse();
+    return ds~load_msg_addr();
+}
