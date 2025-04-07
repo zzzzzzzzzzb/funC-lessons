@@ -1,0 +1,87 @@
+#include "imports/stdlib.fc";
+
+{-
+    消息结构如下：
+    op: 32位，1代表put，2代表更新map，移除所有过期的键值对
+    query_id：64位
+    key：256位密钥，map中的key
+    valid_util：64位，过期时间，valid_util和payload共同组成map中的value
+    payload：载荷
+-}
+
+cell load_data() {
+    cell data = get_data();
+    slice ds = data.begin_parse();
+    if (ds.slice_bits() == 0) {
+        return new_dict();
+    } else {
+        return data;
+    }
+}
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    ;; 先获取op和query_id
+    int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
+
+    ;; 加载数据，如果是初次调用，则需要创建一个空字典
+    cell data = get_data();
+    slice ds = data.begin_parse();
+    cell dic = ds.slice_bits() == 0 ? new_dict() : data;
+
+    if (op == 1) {
+        ;; 提取密钥
+        int key = in_msg_body~load_uint(256);
+        ;; value为in_msg_body中的剩余内容
+        dic~udict_set(256, key, in_msg_body);
+        ;; 保存dic
+        set_data(dic);
+        return ();
+    } 
+
+    if (op == 2) {
+        ;; 检查in_msg_body是否为空
+        in_msg_body.end_parse();
+        int key = -1;
+        do {
+            ;; udict_get_next获取下一个键值对
+            ;; key为键，cs为值，f为是否成功获取
+            (key, slice cs, int f) = dic.udict_get_next?(256, key);
+            if (f) {
+                ;; 如果获取成功
+                ;; 首先读取过期时间
+                key~dump();
+                cs~dump();
+                int valid_until = cs~load_uint(64);
+                ;; 如果发现过期时间小于当前时间，则删除该键值对
+                int n = now();
+                n~dump();
+                if (valid_until < n) {
+                    dic.udict_delete?(256, key);
+                }
+            }
+        } until (~ f); ;; 知道没有下一个键值对时停止
+
+        dic~dump();
+        ;; 如果dic为空，则设置data为空
+        if (dic.dict_empty?()) {
+            set_data(begin_cell().end_cell());
+        } else {
+            ;; 存储更新之后的字典
+            set_data(dic);
+        }
+
+        return ();
+    }
+
+    throw(12);
+}
+
+(int, slice) get_key(int key) method_id {
+    cell dic = load_data();
+    (slice payload, int success) = dic.udict_get?(256, key);
+    throw_unless(98, success);
+
+    int valid_util = payload~load_uint(64);
+    return (valid_util, payload);
+}
