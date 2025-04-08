@@ -50,19 +50,16 @@ cell load_data() {
             if (f) {
                 ;; 如果获取成功
                 ;; 首先读取过期时间
-                key~dump();
-                cs~dump();
                 int valid_until = cs~load_uint(64);
                 ;; 如果发现过期时间小于当前时间，则删除该键值对
-                int n = now();
-                n~dump();
-                if (valid_until < n) {
-                    dic.udict_delete?(256, key);
+                if (valid_until < now()) {
+                    ;; deleted，如果删除成功，返回-1
+                    ;; 查询dic时，使用的是dic.udict，而删除时，需要使用~
+                    ;; .操作符用于不修改原对象的只读操作，~操作符用于修改原对象的写操作
+                    dic~udict_delete?(256, key);
                 }
             }
         } until (~ f); ;; 知道没有下一个键值对时停止
-
-        dic~dump();
         ;; 如果dic为空，则设置data为空
         if (dic.dict_empty?()) {
             set_data(begin_cell().end_cell());
