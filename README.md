@@ -1,4 +1,7 @@
-# lesson1
+# funC-lessons
+基于以下内容的funC学习笔记：
+- https://github.com/romanovichim/TonFunClessons_Eng
+- https://github.com/ton-blockchain/token-contract
 
 ## Project structure
 
