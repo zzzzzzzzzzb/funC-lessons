@@ -771,20 +771,20 @@ const int MSG_ONLY_BODY_SIZE = MSG_INFO_REST_BITS + 1 + 1;
 
 builder store_statinit_ref_and_body_ref(builder b, cell state_init, cell body) inline {
     return b
-    .store_uint(MSG_HAVE_STATE_INIT + MSG_STATE_INIT_IN_REF + MSG_BODY_IN_REF, MSG_WITH_STATE_INIT_AND_BODY_SIZE)
-    .store_ref(state_init)
-    .store_ref(body);
+        .store_uint(MSG_HAVE_STATE_INIT + MSG_STATE_INIT_IN_REF + MSG_BODY_IN_REF, MSG_WITH_STATE_INIT_AND_BODY_SIZE)
+        .store_ref(state_init)
+        .store_ref(body);
 }
 
 builder store_only_body_ref(builder b, cell body) inline {
     return b
-    .store_uint(MSG_BODY_IN_REF, MSG_ONLY_BODY_SIZE)
-    .store_ref(body);
+        .store_uint(MSG_BODY_IN_REF, MSG_ONLY_BODY_SIZE)
+        .store_ref(body);
 }
 
 builder store_prefix_only_body(builder b) inline {
     return b
-    .store_uint(0, MSG_ONLY_BODY_SIZE);
+        .store_uint(0, MSG_ONLY_BODY_SIZE);
 }
 
 ;; parse after sender_address

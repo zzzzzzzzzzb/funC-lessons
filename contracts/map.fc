@@ -37,7 +37,7 @@ cell load_data() {
         ;; 保存dic
         set_data(dic);
         return ();
-    } 
+    }
 
     if (op == 2) {
         ;; 检查in_msg_body是否为空

@@ -50,9 +50,9 @@ slice parse_sender_address(cell in_msg_full) inline {
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
             .store_uint(3, 32) ;; op
             .store_uint(query_id, 64) ;; query_id
-            .store_slice(manager_address) 
+            .store_slice(manager_address)
             .store_slice(memorized_address)
-        .end_cell();
+            .end_cell();
         send_raw_message(msg, 64);
     } else {
         throw(3);

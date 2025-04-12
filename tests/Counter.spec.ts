@@ -51,7 +51,7 @@ describe('Counter', () => {
     });
     it('should throw error when number is not 32 bits', async () => {
         const caller = await blockchain.treasury('caller');
-    
+
         const result = await counter.sendDeploy(caller.getSender(), toNano('0.01'));
         expect(result.transactions).toHaveTransaction({
             from: caller.address,
@@ -62,7 +62,7 @@ describe('Counter', () => {
     });
     it('deploy success', async () => {
         const caller = await blockchain.treasury('caller');
-    
+
         const result = await counter.sendDeployWithBody(caller.getSender(), toNano('0.01'));
         expect(result.transactions).toHaveTransaction({
             from: caller.address,

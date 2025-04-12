@@ -9,7 +9,10 @@ export function operationConfigToCell(config: OperationConfig): Cell {
 }
 
 export class Operation implements Contract {
-    constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
+    constructor(
+        readonly address: Address,
+        readonly init?: { code: Cell; data: Cell },
+    ) {}
 
     static createFromAddress(address: Address) {
         return new Operation(address);
@@ -29,7 +32,13 @@ export class Operation implements Contract {
         });
     }
 
-    async sendChangeAddress(provider: ContractProvider, via: Sender, value: bigint, queryId: bigint, newAddress: Address) {
+    async sendChangeAddress(
+        provider: ContractProvider,
+        via: Sender,
+        value: bigint,
+        queryId: bigint,
+        newAddress: Address,
+    ) {
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,

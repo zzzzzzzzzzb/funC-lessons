@@ -21,9 +21,14 @@ describe('Operation', () => {
 
         deployer = await blockchain.treasury('deployer');
 
-        operation = blockchain.openContract(Operation.createFromConfig({
-            manager: deployer.address,
-        }, code));
+        operation = blockchain.openContract(
+            Operation.createFromConfig(
+                {
+                    manager: deployer.address,
+                },
+                code,
+            ),
+        );
 
         const deployResult = await operation.sendDeploy(deployer.getSender(), toNano('0.05'));
 
@@ -41,12 +46,7 @@ describe('Operation', () => {
     });
     it('should change saved address by manager', async () => {
         const address = randomAddress();
-        const result = await operation.sendChangeAddress(
-            deployer.getSender(),
-            toNano('0.01'),
-            12345n,
-            address,
-        );
+        const result = await operation.sendChangeAddress(deployer.getSender(), toNano('0.01'), 12345n, address);
         expect(result.transactions).toHaveTransaction({
             from: deployer.address,
             to: operation.address,
@@ -57,12 +57,7 @@ describe('Operation', () => {
         // 只有manager可以改变地址
         const user = await blockchain.treasury('user');
         const address = randomAddress();
-        const result = await operation.sendChangeAddress(
-            user.getSender(),
-            toNano('0.01'),
-            12345n,
-            address,
-        );
+        const result = await operation.sendChangeAddress(user.getSender(), toNano('0.01'), 12345n, address);
         expect(result.transactions).toHaveTransaction({
             from: user.address,
             to: operation.address,
@@ -71,19 +66,10 @@ describe('Operation', () => {
     });
     it('should return required data on `requestAddress` call', async () => {
         const address = randomAddress();
-        await operation.sendChangeAddress(
-            deployer.getSender(),
-            toNano('0.01'),
-            12345n,
-            address
-        );
-    
+        await operation.sendChangeAddress(deployer.getSender(), toNano('0.01'), 12345n, address);
+
         let user = await blockchain.treasury('user');
-        const result = await operation.sendRequestAddress(
-            user.getSender(),
-            toNano('0.01'),
-            12345n
-        );
+        const result = await operation.sendRequestAddress(user.getSender(), toNano('0.01'), 12345n);
         expect(result.transactions).toHaveTransaction({
             from: operation.address,
             to: user.address,

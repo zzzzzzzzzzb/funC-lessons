@@ -8,7 +8,10 @@ export function counterConfigToCell(config: CounterConfig): Cell {
 }
 
 export class Counter implements Contract {
-    constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
+    constructor(
+        readonly address: Address,
+        readonly init?: { code: Cell; data: Cell },
+    ) {}
 
     static createFromAddress(address: Address) {
         return new Counter(address);
@@ -35,13 +38,8 @@ export class Counter implements Contract {
             body: beginCell().storeUint(0, 64).endCell(),
         });
     }
-    
-    async sendNumber(
-        provider: ContractProvider,
-        via: Sender,
-        value: bigint,
-        number: bigint
-    ) {
+
+    async sendNumber(provider: ContractProvider, via: Sender, value: bigint, number: bigint) {
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,

@@ -24,12 +24,10 @@ describe('Map', () => {
             blockchainLogs: true,
             vmLogs: 'vm_logs',
             debugLogs: true,
-        }
+        };
         deployer = await blockchain.treasury('deployer');
 
-        map = blockchain.openContract(Map.createFromConfig({
-            
-        }, code));
+        map = blockchain.openContract(Map.createFromConfig({}, code));
 
         const deployResult = await map.sendDeploy(deployer.getSender(), toNano('0.05'));
 
@@ -45,14 +43,14 @@ describe('Map', () => {
             validUntil: 1000n,
             value: beginCell().storeUint(123, 16).endCell().asSlice(),
         });
-    
+
         await map.sendSet(deployer.getSender(), toNano('0.05'), {
             queryId: 123n,
             key: 2n,
             validUntil: 2000n,
             value: beginCell().storeUint(234, 16).endCell().asSlice(),
         });
-    
+
         await map.sendSet(deployer.getSender(), toNano('0.05'), {
             queryId: 123n,
             key: 3n,
@@ -68,21 +66,15 @@ describe('Map', () => {
     it('should store and retrieve values', async () => {
         let [validUntil, value] = await map.getKey(1n);
         expect(validUntil).toEqual(1000n);
-        expect(value).toEqualSlice(
-            beginCell().storeUint(123, 16).endCell().asSlice()
-        );
-    
+        expect(value).toEqualSlice(beginCell().storeUint(123, 16).endCell().asSlice());
+
         [validUntil, value] = await map.getKey(2n);
         expect(validUntil).toEqual(2000n);
-        expect(value).toEqualSlice(
-            beginCell().storeUint(234, 16).endCell().asSlice()
-        );
-    
+        expect(value).toEqualSlice(beginCell().storeUint(234, 16).endCell().asSlice());
+
         [validUntil, value] = await map.getKey(3n);
         expect(validUntil).toEqual(3000n);
-        expect(value).toEqualSlice(
-            beginCell().storeUint(345, 16).endCell().asSlice()
-        );
+        expect(value).toEqualSlice(beginCell().storeUint(345, 16).endCell().asSlice());
     });
 
     it('should throw on not found key', async () => {
@@ -93,39 +85,33 @@ describe('Map', () => {
         await map.sendClear(deployer.getSender(), toNano('0.05'), {
             queryId: 123n,
         });
-    
+
         let [validUntil, value] = await map.getKey(1n);
         expect(validUntil).toEqual(1000n);
-        expect(value).toEqualSlice(
-            beginCell().storeUint(123, 16).endCell().asSlice()
-        );
-    
+        expect(value).toEqualSlice(beginCell().storeUint(123, 16).endCell().asSlice());
+
         blockchain.now = 1500;
-    
+
         await map.sendClear(deployer.getSender(), toNano('0.05'), {
             queryId: 123n,
         });
 
         await expect(map.getKey(1n)).rejects.toThrow();
-    
+
         [validUntil, value] = await map.getKey(2n);
         expect(validUntil).toEqual(2000n);
-        expect(value).toEqualSlice(
-            beginCell().storeUint(234, 16).endCell().asSlice()
-        );
-    
+        expect(value).toEqualSlice(beginCell().storeUint(234, 16).endCell().asSlice());
+
         [validUntil, value] = await map.getKey(3n);
         expect(validUntil).toEqual(3000n);
-        expect(value).toEqualSlice(
-            beginCell().storeUint(345, 16).endCell().asSlice()
-        );
-    
+        expect(value).toEqualSlice(beginCell().storeUint(345, 16).endCell().asSlice());
+
         blockchain.now = 3001;
-    
+
         await map.sendClear(deployer.getSender(), toNano('0.05'), {
             queryId: 123n,
         });
-    
+
         await expect(map.getKey(2n)).rejects.toThrow();
         await expect(map.getKey(3n)).rejects.toThrow();
     });

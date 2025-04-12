@@ -38,7 +38,7 @@ int equal_slices(slice a, slice b) asm "SDEQ";
     slice owner_address = load_data();
 
     ;; 如果不相等，则需要进行转发
-    if ~(equal_slices(sender_address, owner_address)) {
+    if ~ (equal_slices(sender_address, owner_address)) {
         ;; 构造消息体
         cell msg_body_cell = begin_cell().store_slice(in_msg_body).end_cell();
 
@@ -57,13 +57,13 @@ int equal_slices(slice a, slice b) asm "SDEQ";
 
         ;; 构造转发消息
         var msg_forward = begin_cell()
-        .store_uint(0x10, 6)
-        .store_slice(owner_address)
-        .store_grams(0)
-        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-        .store_slice(sender_address)
-        .store_ref(msg_body_cell)
-    .end_cell();
+            .store_uint(0x10, 6)
+            .store_slice(owner_address)
+            .store_grams(0)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_slice(sender_address)
+            .store_ref(msg_body_cell)
+            .end_cell();
 
         ;; 发送消息
         send_raw_message(msg_forward, 64);

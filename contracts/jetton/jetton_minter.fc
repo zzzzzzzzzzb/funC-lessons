@@ -26,7 +26,7 @@
         .store_slice(admin_address)
         .store_ref(content)
         .store_ref(jetton_wallet_code)
-    .end_cell());
+        .end_cell());
 }
 
 () mint_tokens(int amount, slice to_address, cell jetton_wallet_code, cell master_msg) impure {
@@ -57,7 +57,7 @@
     }
     slice sender_address = cs~load_msg_addr(); ;; 发送者地址
     ;; 操作码
-    int op = in_msg_body~load_uint(32); 
+    int op = in_msg_body~load_uint(32);
     ;; query_id
     int query_id = in_msg_body~load_uint(64);
 
@@ -110,11 +110,11 @@
 }
 
 (int, int, slice, cell, cell) get_jetton_data() method_id {
-	(int total_supply, slice admin_address, cell content, cell jetton_wallet_code) = load_data();
-	return (total_supply, -1, admin_address, content, jetton_wallet_code);
+    (int total_supply, slice admin_address, cell content, cell jetton_wallet_code) = load_data();
+    return (total_supply, -1, admin_address, content, jetton_wallet_code);
 }
 
 slice get_wallet_address(slice owner_address) method_id {
-	(int total_supply, slice admin_address, cell content, cell jetton_wallet_code) = load_data();
-	return calculate_user_jetton_wallet_address(owner_address, my_address(), jetton_wallet_code);
+    (int total_supply, slice admin_address, cell content, cell jetton_wallet_code) = load_data();
+    return calculate_user_jetton_wallet_address(owner_address, my_address(), jetton_wallet_code);
 }

@@ -7,14 +7,14 @@ import {
     ContractProvider,
     Sender,
     SendMode,
-    toNano
+    toNano,
 } from '@ton/core';
 
 export type JettonMinterConfig = {
     // TotalSupply: bigint;
-    Admin: Address,
-    Content: Cell,
-    WalletCode: Cell,
+    Admin: Address;
+    Content: Cell;
+    WalletCode: Cell;
 };
 
 export abstract class Op {
@@ -42,7 +42,10 @@ export function jettonMinterConfigToCell(config: JettonMinterConfig): Cell {
 }
 
 export class JettonMinter implements Contract {
-    constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
+    constructor(
+        readonly address: Address,
+        readonly init?: { code: Cell; data: Cell },
+    ) {}
 
     static createFromAddress(address: Address) {
         return new JettonMinter(address);
@@ -63,7 +66,14 @@ export class JettonMinter implements Contract {
     }
 
     // 依据funC代码中，接收mint消息时，组装in_msg_body结构
-    static mintMessage(from: Address, to: Address, jettonAmount: bigint, forwardTonAmount: bigint, totalTonAmount: bigint, queryId: number | bigint) {
+    static mintMessage(
+        from: Address,
+        to: Address,
+        jettonAmount: bigint,
+        forwardTonAmount: bigint,
+        totalTonAmount: bigint,
+        queryId: number | bigint,
+    ) {
         // return beginCell()
         // .storeUint(Op.mint, 32)
         // .storeUint(queryId, 64)
@@ -80,8 +90,9 @@ export class JettonMinter implements Contract {
         //     .storeMaybeRef(null)
         //     .endCell())
         // .endCell();
-        const mintMsg = beginCell().storeUint(Op.internal_transfer, 32)
-            .storeUint(0, 64)
+        const mintMsg = beginCell()
+            .storeUint(Op.internal_transfer, 32)
+            .storeUint(queryId, 64)
             .storeCoins(jettonAmount)
             .storeAddress(null)
             .storeAddress(from) // Response addr
@@ -89,7 +100,9 @@ export class JettonMinter implements Contract {
             .storeMaybeRef(null)
             .endCell();
 
-        return beginCell().storeUint(Op.mint, 32).storeUint(queryId, 64) // op, queryId
+        return beginCell()
+            .storeUint(Op.mint, 32)
+            .storeUint(queryId, 64) // op, queryId
             .storeAddress(to)
             .storeCoins(totalTonAmount)
             .storeCoins(jettonAmount)
@@ -97,7 +110,15 @@ export class JettonMinter implements Contract {
             .endCell();
     }
 
-    async sendMint(provider: ContractProvider, via: Sender, to: Address, jettonAmount: bigint, forwardTonAmount: bigint, totalTonAmount: bigint, queryId: number | bigint) {
+    async sendMint(
+        provider: ContractProvider,
+        via: Sender,
+        to: Address,
+        jettonAmount: bigint,
+        forwardTonAmount: bigint,
+        totalTonAmount: bigint,
+        queryId: number | bigint,
+    ) {
         await provider.internal(via, {
             value: totalTonAmount + toNano('0.015'),
             sendMode: SendMode.PAY_GAS_SEPARATELY,
@@ -105,8 +126,10 @@ export class JettonMinter implements Contract {
         });
     }
 
-    async getWalletAddress(provider: ContractProvider, owner: Address){
-        let res = await provider.get('get_wallet_address', [{ type: 'slice', cell: beginCell().storeAddress(owner).endCell()}]);
+    async getWalletAddress(provider: ContractProvider, owner: Address) {
+        let res = await provider.get('get_wallet_address', [
+            { type: 'slice', cell: beginCell().storeAddress(owner).endCell() },
+        ]);
         return res.stack.readAddress();
     }
 
@@ -123,7 +146,7 @@ export class JettonMinter implements Contract {
             adminAddress,
             content,
             walletCode,
-        }
+        };
     }
 
     async getTotalSupply(provider: ContractProvider) {

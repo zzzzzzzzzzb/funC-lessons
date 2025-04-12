@@ -4,7 +4,8 @@
     "scripts": {
         "start": "blueprint run",
         "build": "blueprint build",
-        "test": "jest --verbose"
+        "test": "jest --verbose",
+        "format": "prettier . --write"
     },
     "devDependencies": {
         "@ton/blueprint": "^0.29.0",

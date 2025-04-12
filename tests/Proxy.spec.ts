@@ -20,9 +20,14 @@ describe('Proxy', () => {
 
         deployer = await blockchain.treasury('deployer');
 
-        proxy = blockchain.openContract(Proxy.createFromConfig({
-            owner: deployer.address,
-        }, code));
+        proxy = blockchain.openContract(
+            Proxy.createFromConfig(
+                {
+                    owner: deployer.address,
+                },
+                code,
+            ),
+        );
 
         const deployResult = await proxy.sendDeploy(deployer.getSender(), toNano('0.05'));
 
@@ -35,9 +40,9 @@ describe('Proxy', () => {
     });
 
     it('get deployer', async () => {
-        console.log("proxy address: ", proxy.address);
-        console.log("deployer address: ", deployer.address);
-        console.log("owner address: ", await proxy.getOwner());
+        console.log('proxy address: ', proxy.address);
+        console.log('deployer address: ', deployer.address);
+        console.log('owner address: ', await proxy.getOwner());
     });
 
     it('should not forward ', async () => {
@@ -67,6 +72,5 @@ describe('Proxy', () => {
             to: deployer.address,
             body: beginCell().storeAddress(user1.address).storeStringRefTail('Hello World!').endCell(),
         });
-    })
-
+    });
 });

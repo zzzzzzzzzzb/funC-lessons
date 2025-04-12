@@ -3,9 +3,14 @@ import { Operation } from '../wrappers/Operation';
 import { compile, NetworkProvider } from '@ton/blueprint';
 
 export async function run(provider: NetworkProvider) {
-    const operation = provider.open(Operation.createFromConfig({
-        manager: provider.sender().address!,
-    }, await compile('Operation')));
+    const operation = provider.open(
+        Operation.createFromConfig(
+            {
+                manager: provider.sender().address!,
+            },
+            await compile('Operation'),
+        ),
+    );
 
     await operation.sendDeploy(provider.sender(), toNano('0.05'));
 

@@ -9,7 +9,10 @@ export function proxyConfigToCell(config: ProxyConfig): Cell {
 }
 
 export class Proxy implements Contract {
-    constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
+    constructor(
+        readonly address: Address,
+        readonly init?: { code: Cell; data: Cell },
+    ) {}
 
     static createFromAddress(address: Address) {
         return new Proxy(address);
